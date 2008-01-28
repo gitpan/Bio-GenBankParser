@@ -1,5 +1,7 @@
 package Bio::GenBankParser;
 
+# $Id: GenBankParser.pm 7 2008-01-28 20:02:47Z kyclark $
+
 use warnings;
 use strict;
 use Carp qw( croak );
@@ -17,11 +19,11 @@ Bio::GenBankParser - Parse::RecDescent parser for a GenBank record
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
@@ -54,6 +56,9 @@ sub new {
 =pod
 
 =head2 new
+
+  use Bio::GenBankParser;
+  my $parser = Bio::GenBankParser->new;
 
 =cut
 
@@ -167,7 +172,7 @@ sub parse {
     my $rec = $parser->parse( $text );
     print $rec->{'ACCESSION'};
 
-Parses a (single) GenBank record into a hash(ref).
+Parses a (single) GenBank record into a hash reference.
 
 =cut
 
@@ -276,7 +281,7 @@ locus: /LOCUS/xms genbank_accession sequence_length molecule_type
 
 space: /\s+/
 
-genbank_accession: /[A-Z]{1}\d{5}/ | /[A-Z]{2}\d{6}/ 
+genbank_accession: /[A-Z]{1}\d{5}/ | /[A-Z]{2}_?\d{6}/ 
 
 genbank_version: /[A-Z]{1}\d{5}\.\d+/ | /[A-Z]{2}\d{6}\.\d+/
 
@@ -479,7 +484,7 @@ END_OF_GRAMMAR
 
 =head1 AUTHOR
 
-Ken Youens-Clark E<lt>kclark at cshl.eduE<gt>.
+Ken Youens-Clark E<lt>kclark at cpan.org<gt>.
 
 =head1 BUGS
 

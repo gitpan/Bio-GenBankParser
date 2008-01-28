@@ -1,20 +1,23 @@
 ---
 name: Bio-GenBankParser
-version: 0.01
+version: 0.02
 author:
-  - 'Ken Youens-Clark <kclark@cshl.edu>'
+  - 'Ken Youens-Clark <kclark@cpan.org>'
 abstract: Parse::RecDescent parser for a GenBank record
 license: perl
 resources:
   license: http://dev.perl.org/licenses/
 requires:
   Parse::RecDescent: 1.94
+  Readonly: 0
 build_requires:
   Test::More: 0
+recommends:
+  YAML: 0
 provides:
   Bio::GenBankParser:
     file: lib/Bio/GenBankParser.pm
-    version: 0.01
+    version: 0.02
 generated_by: Module::Build version 0.2808
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
