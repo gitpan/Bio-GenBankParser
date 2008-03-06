@@ -1,6 +1,6 @@
 package Bio::GenBankParser;
 
-# $Id: GenBankParser.pm 7 2008-01-28 20:02:47Z kyclark $
+# $Id: GenBankParser.pm 18 2008-03-06 15:23:03Z kyclark $
 
 use warnings;
 use strict;
@@ -23,7 +23,7 @@ Version 0.02
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 SYNOPSIS
 
@@ -63,7 +63,7 @@ sub new {
 =cut
 
     my $class = shift;
-    my %args  = ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
+    my %args  = ( @_ && ref $_[0] eq 'HASH' ) ? %{ $_[0] } : @_;
     my $self  = bless \%args, $class;
 
     if ( $args{'file'} ) {
@@ -254,12 +254,14 @@ section: header
     | locus
     | definition
     | accession_line
+    | project_line
     | version_line
     | keywords
     | source_line
     | organism
     | reference
     | features
+    | base_count
     | origin
     | comment
     | record_delimiter
@@ -321,6 +323,11 @@ version_line: /VERSION/ synonym(s)
         push @{ $record{'VERSION'} }, @{ $item[2] };
     }
 
+project_line: /PROJECT/ section_continuing_indented
+    {
+        $record{'PROJECT'} = $item[2];
+    }
+
 synonym: genbank_version | genbank_gi
 
 keywords: /KEYWORDS/ keyword_value
@@ -328,7 +335,11 @@ keywords: /KEYWORDS/ keyword_value
         $record{'KEYWORDS'} = $item[2];
     }
 
-keyword_value: /([^.]+)[.]?(?=\n)/ { $return = [ split(/,\s*/, $1) ] }
+keyword_value: section_continuing_indented
+    { 
+        ( my $str = $item[1] ) =~ s/\.$//;
+        $return = [ split(/,\s*/, $str ) ];
+    }
     | PERIOD { $return = [] }
 
 source_line: /SOURCE/ source_value 
@@ -399,11 +410,12 @@ pubmed: /PUBMED/ NUMBER
 features: /FEATURES/ section_continuing_indented
     { 
         my ( $location, $cur_feature_name, %cur_features, $cur_key );
-        for my $fline ( map { s/^\s+|\s+$//g; $_ } split(/\n/, $item[2]) ) {
-            next if $fline eq 'Location/Qualifiers';
+#        for my $fline ( map { s/^\s+|\s+$//g; $_ } split(/\n/, $item[2]) ) {
+        for my $fline ( split(/\n/, $item[2]) ) {
+            next if $fline =~ m{^\s*Location/Qualifiers};
             next if $fline !~ /\S+/;
 
-            if ( $fline =~ /^\/ (\w+?) = (.+)$/xms ) {
+            if ( $fline =~ /^\s{21}\/ (\w+?) = (.+)$/xms ) {
                 my ( $key, $value )   = ( $1, $2 );
                 $value                =~ s/^"|"$//g;
                 $cur_key              = $key;
@@ -417,7 +429,7 @@ features: /FEATURES/ section_continuing_indented
                     $record{ uc $key } = $value;
                 }
             }
-            elsif ( $fline =~ /^(\S+) \s+ (.+)$/xms ) {
+            elsif ( $fline =~ /^\s{5}(\S+) \s+ (.+)$/xms ) {
                 my ( $this_feature_name, $this_location ) = ( $1, $2 );
                 $cur_key = '';
 
@@ -434,9 +446,12 @@ features: /FEATURES/ section_continuing_indented
                 ( $cur_feature_name, $location ) = 
                     ( $this_feature_name, $this_location );
             }
-            elsif ( $fline =~ /^(\w+)["]?$/ ) {
+            elsif ( $fline =~ /^\s{21}([^"]+)["]?$/ ) {
                 if ( $cur_key ) {
-                    $cur_features{ $cur_key } .= $1;
+                    $cur_features{ $cur_key } .= 
+                        $cur_key eq 'translation' 
+                            ? $1
+                            : ' ' . $1;
                 }
             }
         }
@@ -448,7 +463,22 @@ features: /FEATURES/ section_continuing_indented
         };
     }
 
-origin: /ORIGIN/ origin_value { $record{'ORIGIN'} = $item[2] }
+base_count: /BASE COUNT/ base_summary(s)
+    {
+        for my $sum ( @{ $item[2] } ) {
+            $record{'BASE_COUNT'}{ $sum->[0] } = $sum->[1];
+        }
+    }
+
+base_summary: /\d+/ /[a-zA-Z]+/
+    {
+        $return = [ $item[2], $item[1] ];
+    }
+
+origin: /ORIGIN/ origin_value 
+    { 
+        $record{'ORIGIN'} = $item[2] 
+    }
 
 origin_value: /(.*?)(?=\n\/\/)/xms
     {
@@ -484,7 +514,7 @@ END_OF_GRAMMAR
 
 =head1 AUTHOR
 
-Ken Youens-Clark E<lt>kclark at cpan.org<gt>.
+Ken Youens-Clark E<lt>kclark at cpan.orgE<gt>.
 
 =head1 BUGS
 

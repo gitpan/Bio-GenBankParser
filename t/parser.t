@@ -6,7 +6,7 @@ use Data::Dumper;
 use File::Spec::Functions;
 use FindBin qw( $Bin );
 use Readonly;
-use Test::More tests => 11;
+use Test::More tests => 17;
 
 Readonly my $TEST_DATA_DIR => catdir( $Bin, 'data' );
 
@@ -108,5 +108,43 @@ require_ok( 'Bio::GenBankParser' );
         'Sequence (Origin)'
     );
 
-    # print Dumper($gb), "\n";
+    is(
+        scalar @{ $gb->{'FEATURES'} },
+        5,
+        'Features',
+    );
+
+    my $source = shift @{ $gb->{'FEATURES'} };
+
+    is(
+        $source->{'name'},
+        'source',
+        'Source attribute',
+    );
+
+    is(
+        $source->{'feature'}{'note'},
+        'Organ: Autoregulated shoots; Vector: lambda ZAPII; Double stranded cDNAs were synthesized by the method of Gubler and  Hoffman (1983), using a cDNA synthesis kit (Amersham Life Science Inc.)  and then ligated to an EcoRI adaptor (Amersham). cDNA library was  constructed in lambda ZAPII vector using lambda ZAPII/EcoRI/Gigapack II cloning kit (Stratagene)',
+        'Source/note'
+    );
+
+    is( 
+        $gb->{'BASE_COUNT'}{'a'},
+        163,
+        'Base count'
+    );
+
+    is( 
+        $gb->{'BASE_COUNT'}{'others'},
+        10,
+        'Base count 2'
+    );
+
+    is( 
+        $gb->{'PROJECT'},
+        'GenomeProject:18357',
+        'Project'
+    );
+
+#    print Dumper($gb), "\n";
 }

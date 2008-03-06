@@ -7,3 +7,7 @@ Revision history for Bio-GenBankParser
         Fixed up Build.PL to try to avoid automated testing errors, added
         docs, expanded example script a bit, allowed a RefSeq accession to 
         be valid in the parser.
+
+0.03    2008-03-06
+        Fixes to parsing of FEATURES, added parsing of PROJECT and base 
+        summary.
