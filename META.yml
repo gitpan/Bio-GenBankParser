@@ -1,6 +1,6 @@
 ---
 name: Bio-GenBankParser
-version: 0.03
+version: 0.04
 author:
   - 'Ken Youens-Clark <kclark@cpan.org>'
 abstract: Parse::RecDescent parser for a GenBank record
@@ -17,7 +17,7 @@ recommends:
 provides:
   Bio::GenBankParser:
     file: lib/Bio/GenBankParser.pm
-    version: 0.03
+    version: 0.04
 generated_by: Module::Build version 0.2808
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html

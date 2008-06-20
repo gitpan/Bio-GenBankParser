@@ -8,6 +8,14 @@ Revision history for Bio-GenBankParser
         docs, expanded example script a bit, allowed a RefSeq accession to 
         be valid in the parser.
 
-0.03    2008-03-06
-        Fixes to parsing of FEATURES, added parsing of PROJECT and base 
-        summary.
+0.03    2008-01-31
+        Fixes to parsing of FEATURES.
+
+0.04    2008-06-20
+        Handle empty records, genbank division in LOCUS is now optional,
+        added ability to comment out a line using a leading "#," genbank
+        accession is now just /\w+/, sequence length can be "aa" or
+        "bp," take the first accession from ACCESSION and put the rest
+        into VERSION, added DBSOURCE, authors is optional in reference
+        and remarks can appear in two places(?!), finally fixed handling
+        of PUBMED (?), added "CONSRTM."
