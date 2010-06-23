@@ -1,6 +1,6 @@
 package Bio::GenBankParser;
 
-# $Id: GenBankParser.pm 24 2008-06-20 19:03:20Z kyclark $
+# $Id: GenBankParser.pm 27 2010-06-23 16:45:50Z kyclark $
 
 use warnings;
 use strict;
@@ -19,11 +19,11 @@ Bio::GenBankParser - Parse::RecDescent parser for a GenBank record
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 SYNOPSIS
 
@@ -270,6 +270,7 @@ section: commented_line
     | reference
     | features
     | base_count
+    | contig
     | origin
     | comment
     | record_delimiter
@@ -301,7 +302,7 @@ molecule_type: /\w+/ (/[a-zA-Z]{4,}/)(?)
     }
 
 genbank_division: 
-    /(PRI|ROD|MAM|VRT|INV|PLN|BCT|VRL|PHG|SYN|UNA|EST|PAT|STS|GSS|HTG|HTC|ENV)/
+    /(PRI|CON|ROD|MAM|VRT|INV|PLN|BCT|VRL|PHG|SYN|UNA|EST|PAT|STS|GSS|HTG|HTC|ENV)/
 
 modification_date: /\d+-[A-Z]{3}-\d{4}/
 
@@ -312,7 +313,9 @@ definition: /DEFINITION/ section_continuing_indented
 
 section_continuing_indented: /.*?(?=\n[A-Z]+\s+)/xms
 
-accession_line: /ACCESSION/ /(.+)(?=\n)/
+section_continuing_indented: /.*?(?=\n\/\/)/xms
+
+accession_line: /ACCESSION/ section_continuing_indented
     {
         my @accs = split /\s+/, $item[2];
         $record{'ACCESSION'} = shift @accs;
@@ -521,6 +524,11 @@ comment: /COMMENT/ comment_value
 comment_value: /(.+?)(?=\n[A-Z]+)/xms
     { 
         $record{'COMMENT'} = $1;
+    }
+
+contig: /CONTIG/ section_continuing_indented 
+    {
+        $record{'CONTIG'} = $item[2];
     }
 
 commented_line: /#[^\n]+/
